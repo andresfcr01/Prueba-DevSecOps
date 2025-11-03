@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prueba-devsecops
+  namespace: devsecops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prueba-devsecops
+  template:
+    metadata:
+      labels:
+        app: prueba-devsecops
+    spec:
+      containers:
+      - name: prueba-devsecops
+        image: andres0118/prueba-devsecops:latest
+        ports:
+        - containerPort: 80
