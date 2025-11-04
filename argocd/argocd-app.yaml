@@ -8,8 +8,8 @@ spec:
   
   source:
     repoURL: https://github.com/andresfcr01/Prueba-DevSecOps.git
-    targetRevision: HEAD
-    path: helm 
+    targetRevision: main
+    path: helm/prueba-devsecops
   
   destination:
     server: https://kubernetes.default.svc
@@ -20,4 +20,4 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-    - CreateNamespace=true
+      - CreateNamespace=true
