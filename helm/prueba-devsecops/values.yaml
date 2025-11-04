@@ -1,6 +1,6 @@
 image:
   repository: andres0118/prueba-devsecops 
-  tag: "latest"                            
+  tag: "9d661ac"                            
 
 service:
   type: NodePort

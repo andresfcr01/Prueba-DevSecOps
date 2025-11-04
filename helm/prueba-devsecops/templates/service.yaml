@@ -4,10 +4,10 @@ metadata:
   name: prueba-devsecops-service
   namespace: default
 spec:
-  type: NodePort
+  type: {{ .Values.service.type }}
   selector:
     app: prueba-devsecops
   ports:
     - port: 80
-      targetPort: 5000
-      nodePort: 30080
+      targetPort: {{ .Values.service.port }}
+      nodePort: {{ .Values.service.nodePort }}
