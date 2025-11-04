@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "prueba-devsecops.fullname" . }}
+  name: prueba-devsecops
   labels:
-    app: {{ include "prueba-devsecops.name" . }}
+    app: prueba-devsecops
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ include "prueba-devsecops.name" . }}
+      app: prueba-devsecops
   template:
     metadata:
       labels:
-        app: {{ include "prueba-devsecops.name" . }}
+        app: prueba-devsecops
     spec:
       containers:
-        - name: {{ .Chart.Name }}
+        - name: prueba-devsecops
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           ports:
             - containerPort: 5000

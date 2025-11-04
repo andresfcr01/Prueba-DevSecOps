@@ -1,7 +1,8 @@
 image:
-  repository: your-dockerhub-user/prueba-devsecops
-  tag: "latest"
+  repository: andres0118/prueba-devsecops 
+  tag: "latest"                            
 
 service:
-  type: ClusterIP
+  type: NodePort
   port: 5000
+  nodePort: 30080
