@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
         - name: prueba-devsecops
-          image: andres0118/prueba-devsecops:e65b50b
+          image: andres0118/prueba-devsecops:f11dda8
           ports:
             - containerPort: 80
