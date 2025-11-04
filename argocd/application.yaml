@@ -1,4 +1,3 @@
-# argocd/application.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -6,13 +5,16 @@ metadata:
   namespace: argocd
 spec:
   project: default
+  
   source:
-    repoURL: https://github.com/andresfcr01/Prueba-DevSecOps.git  
+    repoURL: https://github.com/andresfcr01/Prueba-DevSecOps.git
     targetRevision: HEAD
-    path: helm/app-chart 
+    path: helm 
+  
   destination:
     server: https://kubernetes.default.svc
-    namespace: devsecops 
+    namespace: devsecops
+  
   syncPolicy:
     automated:
       prune: true
