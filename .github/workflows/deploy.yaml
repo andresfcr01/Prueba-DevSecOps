@@ -1,4 +1,4 @@
-name: CI/CD con ArgoCD y Docker Hub
+name: CI/CD GitOps - Build & Update YAML Plano
 
 on:
   push:
@@ -6,28 +6,54 @@ on:
       - main
 
 jobs:
-  deploy:
+  build_and_deploy:
     runs-on: ubuntu-latest
+    
+    env:
+      IMAGE_REPO: andres0118/prueba-devsecops
+      # Ruta del manifiesto de Kubernetes a modificar
+      DEPLOYMENT_MANIFEST: k8s/deployment.yaml 
 
     steps:
-      - name: Checkout del código
+      - name: Checkout Código Fuente
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT_TOKEN }} 
 
-      - name: Login en Docker Hub
-        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+      
+      - name: 🐋 Login en Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Construir y subir imagen
+      - name: 🏷️ Definir Tag con SHA del Commit (7 caracteres)
+        id: tag
+        run: echo "NEW_TAG=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
+
+      - name: 📦 Construir y Subir Imagen a Docker Hub
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ env.IMAGE_REPO }}:${{ env.NEW_TAG }},${{ env.IMAGE_REPO }}:latest
+
+      
+      - name: 🔧 Instalar yq (YAML Processor)
+        run: sudo snap install yq
+
+      - name: 📝 Actualizar la Etiqueta de la Imagen en deployment.yaml
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/prueba-devsecops:latest .
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/prueba-devsecops:latest
+          echo "Actualizando imagen a ${{ env.IMAGE_REPO }}:${{ env.NEW_TAG }}"
+          
+          # La sintaxis de yq para modificar el primer contenedor en el Deployment YAML
+          yq e '.spec.template.spec.containers[0].image = "${{ env.IMAGE_REPO }}:${{ env.NEW_TAG }}"' -i ${{ env.DEPLOYMENT_MANIFEST }}
+          
+          echo "Contenido de deployment.yaml actualizado (Snippet):"
+          yq e '.spec.template.spec.containers[0].image' ${{ env.DEPLOYMENT_MANIFEST }}
 
-      - name: Configurar Kubeconfig
-        run: |
-          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > kubeconfig
-          export KUBECONFIG=kubeconfig
-          kubectl get nodes
-
-      - name: Desplegar con ArgoCD
-        run: |
-          argocd login ${{ secrets.ARGOCD_SERVER }} --auth-token ${{ secrets.ARGOCD_AUTH_TOKEN }} --insecure
-          argocd app sync prueba-devsecops --grpc-web || echo "No existe la app, saltando."
+      - name: ⬆️ Commit y Push del cambio GitOps
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'GitOps: Despliegue de imagen con tag ${{ env.NEW_TAG }}'
+          file_pattern: ${{ env.DEPLOYMENT_MANIFEST }}
